@@ -3,7 +3,9 @@ package com.example.geoquiz
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,50 +53,95 @@ fun GeoQuiz() {
     val questions = listOf(
         Question("Canberra is the capital of Australia.", true),
         Question("The Pacific Ocean is larger than the Atlantic Ocean.", true),
-        Question("The Suez Canal connects the Red Sea and the Indian Ocean.", false)
+        Question("The Suez Canal connects the Red Sea and the Indian Ocean.", false),
+        Question("The source of the Nile River is in Egypt.", false)
     )
 
     var indexQuestion by remember { mutableStateOf(0) }
+    var showAnswerButtons by remember { mutableStateOf(true) }
     var correctAnswers by remember { mutableStateOf(0) }
 
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Text(
-            text = questions[indexQuestion].text,
-            fontSize = 20.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+    Column {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .background(Color(0xFF6200EE)),
+            contentAlignment = Alignment.CenterStart
         ) {
-            Button(
-                onClick = {
-                    if (questions[indexQuestion].answer == true) {
-                        correctAnswers++
-                    }
-                },
-                modifier = Modifier.width(90.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
-            ) {
-                Text("TRUE")
-            }
+            Text(
+                text = "GeoQuiz",
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                modifier = Modifier.padding(start = 10.dp)
+            )
+        }
 
-            Button(
-                onClick = {
-                    if (questions[indexQuestion].answer == false) {
-                        correctAnswers++
-                    }
-                },
-                modifier = Modifier.width(90.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(25.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = questions[indexQuestion].text,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center
+            )
+        }
+
+        if (showAnswerButtons) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text("FALSE")
+                Button(
+                    onClick = {
+                        if (questions[indexQuestion].answer == true) {
+                            correctAnswers++
+                        }
+                        showAnswerButtons = false
+                    },
+                    modifier = Modifier.width(90.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+                ) {
+                    Text("TRUE")
+                }
+
+                Spacer(modifier = Modifier.width(120.dp))
+
+                Button(
+                    onClick = {
+                        if (questions[indexQuestion].answer == false) {
+                            correctAnswers++
+                        }
+                        showAnswerButtons = false
+                    },
+                    modifier = Modifier.width(90.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+                ) {
+                    Text("FALSE")
+                }
+            }
+        }
+
+        if (indexQuestion < questions.size - 1) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(
+                    onClick = {
+                        indexQuestion++
+                        showAnswerButtons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+                ) {
+                    Text("NEXT >")
+                }
             }
         }
     }
