@@ -3,18 +3,22 @@ package com.example.geoquiz
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,9 +39,14 @@ import com.example.geoquiz.ui.theme.GeoQuizTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             GeoQuizTheme {
-                GeoQuiz()
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    GeoQuiz(
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
             }
         }
     }
@@ -49,19 +58,24 @@ data class Question(
 )
 
 @Composable
-fun GeoQuiz() {
+fun GeoQuiz(modifier: Modifier = Modifier) {
     val questions = listOf(
         Question("Canberra is the capital of Australia.", true),
         Question("The Pacific Ocean is larger than the Atlantic Ocean.", true),
         Question("The Suez Canal connects the Red Sea and the Indian Ocean.", false),
-        Question("The source of the Nile River is in Egypt.", false)
+        Question("The source of the Nile River is in Egypt.", false),
+        Question("The Amazon River is the longest river in the Americas.", true),
+        Question("Lake Baikal is the world's oldest and deepest freshwater lake.", true)
     )
 
     var indexQuestion by remember { mutableStateOf(0) }
     var showAnswerButtons by remember { mutableStateOf(true) }
     var correctAnswers by remember { mutableStateOf(0) }
+    var showResult by remember { mutableStateOf(false) }
 
-    Column {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,11 +116,18 @@ fun GeoQuiz() {
                             correctAnswers++
                         }
                         showAnswerButtons = false
+
+                        if (indexQuestion == questions.size - 1) {
+                            showResult = true
+                        }
                     },
-                    modifier = Modifier.width(90.dp),
+                    modifier = Modifier
+                        .width(90.dp)
+                        .height(40.dp),
+                    shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
                 ) {
-                    Text("TRUE")
+                    Text("TRUE", fontSize = 14.sp)
                 }
 
                 Spacer(modifier = Modifier.width(120.dp))
@@ -117,11 +138,18 @@ fun GeoQuiz() {
                             correctAnswers++
                         }
                         showAnswerButtons = false
+
+                        if (indexQuestion == questions.size - 1) {
+                            showResult = true
+                        }
                     },
-                    modifier = Modifier.width(90.dp),
+                    modifier = Modifier
+                        .width(90.dp)
+                        .height(40.dp),
+                    shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
                 ) {
-                    Text("FALSE")
+                    Text("FALSE", fontSize = 14.sp)
                 }
             }
         }
@@ -135,19 +163,48 @@ fun GeoQuiz() {
             ) {
                 Button(
                     onClick = {
-                        indexQuestion++
+                        indexQuestion = (indexQuestion + 1) % questions.size
                         showAnswerButtons = true
                     },
+                    modifier = Modifier.height(40.dp),
+                    shape = RectangleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
                 ) {
-                    Text("NEXT >")
+                    Text("NEXT >", fontSize = 14.sp)
                 }
             }
         }
     }
+
+    if (showResult) {
+        AlertDialog(
+            onDismissRequest = {
+                showResult = false
+            },
+            title = {
+                Text("Результаты", fontWeight = FontWeight.Bold)
+            },
+            text = {
+                Text("Всего: $correctAnswers из ${questions.size}")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResult = false
+                        indexQuestion = 0
+                        correctAnswers = 0
+                        showAnswerButtons = true
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GeoQuizPreview() {
     GeoQuizTheme {
